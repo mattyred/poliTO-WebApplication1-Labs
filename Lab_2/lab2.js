@@ -144,16 +144,31 @@ function FilmLibrary(){
     };
 
     this.getFilmByTitle = (db, titlex) => {
+        return new Promise((resolve,reject) => {
         const query = 'SELECT * FROM films WHERE title = ?';
-        db.all(query, [titlex], (err,rows) => {
-            if(!err){
-                resolve(rows.map(row => {
-                    return new Film(row.id, row.title, row.favorite, row.watchdate, row.rating);
-                }));
-            }else{
-                console.log("There was an error in the query");
-            }
-        })
+            db.all(query, [titlex], (err,rows) => {
+                if(!err){
+                    resolve(rows.map(row => {
+                        return new Film(row.id, row.title, row.favorite, row.watchdate, row.rating);
+                    }));
+                }else{
+                    console.log("There was an error in the query");
+                }
+            });
+        });
+    };
+
+    this.storeNewMovie = (db, movie) => {
+        return new Promise((resolve, reject) => {
+            const query = 'INSERT INTO films(id,title,favorite,watchdate,rating) VALUES(?,?,?,?,?)';
+            db.run(query, [movie.id, movie.title, movie.favorite, movie.date, movie.rating], (err) => {
+                if(err){
+                    throw err;
+                }else{
+                    resolve(true);
+                }
+            });
+        });
     };
 }
 
@@ -207,6 +222,24 @@ const titlex = 'Matrix';
 let filmsWithTitle = [];
 library.getFilmByTitle(db, titlex).then(result => {
     filmsWithTitle = Array.of(result);
-    filmsWithTitle.forEach(f => console.log(f.toString()));
+    //filmsWithTitle.forEach(f => console.log(f.toString()));
 });
+
+// Part 2
+
+// Initialize the copy of the DB
+const db_copy = new sqlite.Database('films_copy.db', err => {
+    if(err) console.log("There was an error in opening the DB");
+});
+
+// Insert a movie in the copy of films.db
+const newFilm = new Film('7', 'ExampleTitle', 1, dayjs('2022-03-19').format('YYYY-MM-DD'), 3);
+library.storeNewMovie(db_copy, newFilm).then(result => {
+    if(result){
+        console.log(`${newFilm.toString()} added to the db`);
+    }
+});
+
+// Delete a movie from the copy of films.db
+const filmToRemove = 7;
 
