@@ -170,6 +170,32 @@ function FilmLibrary(){
             });
         });
     };
+
+    this.removeFilmById = (db, movieId) => {
+        return new Promise((resolve, reject) => {
+            const query = 'DELETE FROM films WHERE id = ?';
+            db.run(query, [movieId], (err) => {
+                if(err){
+                    throw err;
+                }else{
+                    resolve(true);
+                }
+            });
+        });
+    };
+
+    this.removeAllDates = (db) => {
+        return new Promise((resolve, reject) => {
+            const query = 'UPDATE films SET watchdate = NULL';
+            db.run(query, [], (err) => {
+                if(err){
+                    throw err;
+                }else{
+                    resolve(true);
+                }
+            });
+        });
+    };
 }
 
 
@@ -234,12 +260,24 @@ const db_copy = new sqlite.Database('films_copy.db', err => {
 
 // Insert a movie in the copy of films.db
 const newFilm = new Film('7', 'ExampleTitle', 1, dayjs('2022-03-19').format('YYYY-MM-DD'), 3);
+/*
 library.storeNewMovie(db_copy, newFilm).then(result => {
     if(result){
         console.log(`${newFilm.toString()} added to the db`);
     }
 });
-
+*/
 // Delete a movie from the copy of films.db
-const filmToRemove = 7;
+const filmToRemove = 1;
+library.removeFilmById(db_copy, filmToRemove).then(result => {
+    if(result){
+        console.log(`Film with id ${filmToRemove} has been succesfully removed`);
+    }
+});
 
+// Delete the watch date of all the films in the copy of films.db
+library.removeAllDates(db_copy).then(result => {
+    if(result){
+        console.log('Dates have been removed');
+    }
+});
