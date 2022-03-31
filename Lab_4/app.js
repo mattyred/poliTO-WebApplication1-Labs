@@ -118,6 +118,7 @@ function main(){
     let library = new FilmLibrary();
     populateLibrary(library);
 
+    let lastSelectedButton = document.getElementById('list-all');
     // Populate the HTML people
     fillFilmLibraryTable(library.getAllFilms());
 
@@ -133,6 +134,9 @@ function main(){
         // Modify HTML table
         document.getElementById('film-library-table').innerHTML = '';
         fillFilmLibraryTable(filteredFilms);
+
+        // Set the current button as active
+        lastSelectedButton = activate(lastSelectedButton,document.getElementById('list-all'));
     });
 
     document.getElementById('list-favorites').addEventListener('click', event => {
@@ -147,6 +151,9 @@ function main(){
         // Modify HTML table
         document.getElementById('film-library-table').innerHTML = '';
         fillFilmLibraryTable(filteredFilms);
+
+        // Set the current button as active
+        lastSelectedButton = activate(lastSelectedButton,document.getElementById('list-favorites'));
     });
 
     document.getElementById('list-best-rated').addEventListener('click', event => {
@@ -161,6 +168,9 @@ function main(){
         // Modify HTML table
         document.getElementById('film-library-table').innerHTML = '';
         fillFilmLibraryTable(filteredFilms);
+
+        // Set the current button as active
+        lastSelectedButton = activate(lastSelectedButton,document.getElementById('list-best-rated'));
     });
 
     document.getElementById('list-seen-last-month').addEventListener('click', event => {
@@ -175,10 +185,19 @@ function main(){
         // Modify HTML table
         document.getElementById('film-library-table').innerHTML = '';
         fillFilmLibraryTable(filteredFilms);
+
+        // Set the current button as active
+        lastSelectedButton = activate(lastSelectedButton,document.getElementById('list-seen-last-month'));
     });
 
 
 
+}
+
+function activate(lastSelectedButton,element){
+    lastSelectedButton.classList.remove('active');
+    element.classList.add('active');
+    return element;
 }
 
 main();
