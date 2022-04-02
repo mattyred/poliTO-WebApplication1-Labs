@@ -78,6 +78,10 @@ function FilmLibrary(){
                                    }else return false;
                                })
     }
+
+    this.getFilmIds = () => {
+        return this.filmLibrary.map(f => f.id);
+    }
 }
 
 
@@ -94,18 +98,58 @@ function populateLibrary(library){
     library.addNewFilm(f5);
 }
 
-function fillFilmLibraryTable(filmsList){
-    const filmLibraryTable = document.getElementById('film-library-table');
+function fillFilmLibraryTable_delButtons(filmsList){
+    const filmLibraryTable = document.getElementById('film-library-table-body');
+
+    // Define the header table - with delete button
+    document.getElementById('film-library-table-head').insertAdjacentHTML('afterbegin', 
+    '<tr id="table-header-row"> \
+        <th scope="col">Title</th> \
+        <th scope="col">Favorite</th> \
+        <th scope="col">Last Watch Date</th> \
+        <th scope="col">Rating</th> \
+        <th class="text-center" scope="col">Delete Film</th> \
+    </tr>');
 
     // Each element in the list will correspond to a table row with 5 columns
     for(let film of filmsList){
         // create tr etc. for the selected 
-        const filmElement = createFilmRow(film);
+        const filmElement = createFilmRow_delButtons(film);
         filmLibraryTable.insertAdjacentHTML('afterbegin', filmElement);
     }
 }
 
-function createFilmRow(film){
+function fillFilmLibraryTable_noDelButtons(filmsList){
+    const filmLibraryTable = document.getElementById('film-library-table-body');
+
+    // Define the header table - no delete button
+    document.getElementById('film-library-table-head').insertAdjacentHTML('afterbegin', 
+        '<tr id="table-header-row"> \
+            <th scope="col">Title</th> \
+            <th scope="col">Favorite</th> \
+            <th scope="col">Last Watch Date</th> \
+            <th scope="col">Rating</th> \
+        </tr>');
+
+    // Each element in the list will correspond to a table row with 5 columns
+    for(let film of filmsList){
+        // create tr etc. for the selected 
+        const filmElement = createFilmRow_noDelButtons(film);
+        filmLibraryTable.insertAdjacentHTML('afterbegin', filmElement);
+    }
+}
+
+function createFilmRow_delButtons(film){
+    return `<tr> 
+                <td>${film.title}</td>
+                <td>${film.favorite}</td>
+                <td>${film.date}</td>
+                <td>${film.rating}</td>
+                <td class="text-center"><button class="btn btn-danger" id="delete-${film.id}"><img src="pics/trash3.svg"></img></button>
+            </tr>`;
+}
+
+function createFilmRow_noDelButtons(film){
     return `<tr> 
                 <td>${film.title}</td>
                 <td>${film.favorite}</td>
@@ -120,7 +164,8 @@ function main(){
 
     let lastSelectedButton = document.getElementById('list-all');
     // Populate the HTML people
-    fillFilmLibraryTable(library.getAllFilms());
+    fillFilmLibraryTable_delButtons(library.getAllFilms());
+    updateButtonEventListeners(library);
 
     document.getElementById('list-all').addEventListener('click', event => {
         console.log('click All button');
@@ -132,8 +177,9 @@ function main(){
         document.getElementById('selection-title').innerHTML = 'All';
         
         // Modify HTML table
-        document.getElementById('film-library-table').innerHTML = '';
-        fillFilmLibraryTable(filteredFilms);
+        setEmptyFilmTable();
+        fillFilmLibraryTable_delButtons(filteredFilms);
+        updateButtonEventListeners(library);
 
         // Set the current button as active
         lastSelectedButton = activate(lastSelectedButton,document.getElementById('list-all'));
@@ -149,8 +195,8 @@ function main(){
         document.getElementById('selection-title').innerHTML = 'Favorites';
         
         // Modify HTML table
-        document.getElementById('film-library-table').innerHTML = '';
-        fillFilmLibraryTable(filteredFilms);
+        setEmptyFilmTable();
+        fillFilmLibraryTable_noDelButtons(filteredFilms);
 
         // Set the current button as active
         lastSelectedButton = activate(lastSelectedButton,document.getElementById('list-favorites'));
@@ -166,8 +212,8 @@ function main(){
         document.getElementById('selection-title').innerHTML = 'Best Rated';
 
         // Modify HTML table
-        document.getElementById('film-library-table').innerHTML = '';
-        fillFilmLibraryTable(filteredFilms);
+        setEmptyFilmTable();
+        fillFilmLibraryTable_noDelButtons(filteredFilms);
 
         // Set the current button as active
         lastSelectedButton = activate(lastSelectedButton,document.getElementById('list-best-rated'));
@@ -183,17 +229,34 @@ function main(){
         document.getElementById('selection-title').innerHTML = 'Seen Last Month';
 
         // Modify HTML table
-        document.getElementById('film-library-table').innerHTML = '';
-        fillFilmLibraryTable(filteredFilms);
+        setEmptyFilmTable();
+        fillFilmLibraryTable_noDelButtons(filteredFilms);
 
         // Set the current button as active
         lastSelectedButton = activate(lastSelectedButton,document.getElementById('list-seen-last-month'));
-    });
-
-
+    });  
 
 }
 
+function updateButtonEventListeners(library){
+    for(const id of library.getFilmIds()){
+        const button = document.getElementById(`delete-${id}`);
+        button.addEventListener('click', event => {
+            console.log(`click delete-${id}`);
+
+            // remove the film from the library
+            library.deleteFilm(id);
+
+            // remove tr element
+            const tr = button.parentElement.parentElement;
+            tr.remove();
+        });
+    }
+}
+function setEmptyFilmTable(){
+    document.getElementById('film-library-table-head').innerHTML = '';
+    document.getElementById('film-library-table-body').innerHTML = '';
+}
 function activate(lastSelectedButton,element){
     lastSelectedButton.classList.remove('active');
     element.classList.add('active');
